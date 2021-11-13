@@ -12,6 +12,7 @@ public:
     void Shift_up(int);
     void Shift_down(int);
     void increaseEl(int, T);
+    void decreaseEl(int, T);
     template<class Type> friend std::ostream & operator<<(std::ostream&, Heap<Type>);
 };
 
@@ -60,33 +61,32 @@ vector<T> Heap<T>::get_vec() {
 template<typename T>
 void Heap<T>::Shift_down(int ind) {
     int i = ind;
-    while(i >= heap.size()){
+    while(i <= heap.size()){
         int o1 = 2 * i + 1;
         int o2 = 2 * i + 2;
-        if(o1 == -1 && o2 == -1) break;
         if(o1 >= heap.size()) o1 = -1;
         if(o2 >= heap.size()) o2 = -1;
-        if(o1 != -1 && heap[i] < heap[o1]){
-            if(heap[o2] > heap[i] && heap[o2] > heap[o1]){
-                T s = heap[o2];
-                heap[o2] = heap[i];
-                heap[i] = s;
-                i = o2;
-            }
-            else{
-                T s = heap[o1];
-                heap[o1] = heap[i];
-                heap[i] = s;
-                i = o1;
-            }
+        if(o1 == -1 && o2 == -1) break;
+        int maxind = -1;
+        if(o1 == -1 || o2 == -1) maxind = max(o1, o2);
+        else{
+            if(heap[o1] >= heap[o2]) maxind = o1;
+            else maxind = o2;
         }
-        else if(o2 != -1 && heap[i] < heap[o2]){
-            T s = heap[o2];
-            heap[o2] = heap[i];
+        if(heap[i] < heap[maxind]){
+            T s = heap[maxind];
+            heap[maxind] = heap[i];
             heap[i] = s;
-            i = o2;
+            i = maxind;
         }
+        else break;
     }
+    cout << i + 1 << endl;
+}
+
+template<typename T>
+void Heap<T>::decreaseEl(int ind, T val) {
+    heap[ind] -= val;
 }
 
 int main() {
@@ -102,9 +102,9 @@ int main() {
         int ind, val;
         cin >> ind >> val;
         ind--;
-        h.increaseEl(ind, val);
+        h.decreaseEl(ind, val);
         //cout << ind;
-        h.Shift_up(ind);
+        h.Shift_down(ind);
         //cout << "ok";
     }
     cout << h;
