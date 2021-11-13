@@ -13,6 +13,7 @@ public:
     void Shift_down(int);
     void increaseEl(int, T);
     void decreaseEl(int, T);
+    void extractMax();
     template<class Type> friend std::ostream & operator<<(std::ostream&, Heap<Type>);
 };
 
@@ -81,12 +82,21 @@ void Heap<T>::Shift_down(int ind) {
         }
         else break;
     }
-    cout << i + 1 << endl;
+    cout << i + 1 << " ";
 }
 
 template<typename T>
 void Heap<T>::decreaseEl(int ind, T val) {
     heap[ind] -= val;
+}
+
+template<typename T>
+void Heap<T>::extractMax() {
+    T extracted = heap[0];
+    heap[0] = heap.back();
+    heap.pop_back();
+    this->Shift_down(0);
+    cout << extracted << endl;
 }
 
 int main() {
@@ -95,18 +105,6 @@ int main() {
     vector<int> vec(n);
     for(int i = 0;i < n;i++) cin >> vec[i];
     Heap<int> h(vec);
-    int t;
-    cin >> t;
-    while(t != 0) {
-        t--;
-        int ind, val;
-        cin >> ind >> val;
-        ind--;
-        h.decreaseEl(ind, val);
-        //cout << ind;
-        h.Shift_down(ind);
-        //cout << "ok";
-    }
-    cout << h;
+    for(int i = 0;i < n - 1;i++) h.extractMax();
     return 0;
 }
