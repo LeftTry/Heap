@@ -1,5 +1,7 @@
 #include "iostream"
 #include "vector"
+#include <iterator>
+#include <algorithm>
 
 using namespace std;
 
@@ -7,14 +9,24 @@ template <typename T>
 class Heap{
     vector<T> heap;
 public:
+    Heap();
     Heap(vector<T>&);
     vector<T> get_vec();
     void Shift_up(int);
+    void Shift_up1(int);
     void Shift_down(int);
+    void Shift_down1(int);
     void increaseEl(int, T);
     void decreaseEl(int, T);
-    void extractMax();
+    T extractMax();
+    void insert(T);
+    void Delete(int);
     template<class Type> friend std::ostream & operator<<(std::ostream&, Heap<Type>);
+
+    void Build_Heap1(vector<int> &v);
+    void Build_Heap2(vector<int> &v);
+    bool empty();
+    int size();
 };
 
 template<typename T>
@@ -25,6 +37,10 @@ Heap<T>::Heap(vector<T>& h) {
 template<typename T>
 void Heap<T>::Shift_up(int index) {
     int i = index;
+    if(heap.empty()){
+        cout << 0 << " ";
+        return;
+    }
     while(i > 0){
         int o = i / 2;
         if(i % 2 == 0) o--;
@@ -38,6 +54,27 @@ void Heap<T>::Shift_up(int index) {
         //cout << "ok";
     }
     cout << i + 1 << endl;
+}
+
+template<typename T>
+void Heap<T>::Shift_up1(int index) {
+    int i = index;
+    if(heap.empty()){
+        cout << 0 << " ";
+        return;
+    }
+    while(i > 0){
+        int o = i / 2;
+        if(i % 2 == 0) o--;
+        if(heap[i] > heap[o]){
+            T s = heap[o];
+            heap[o] = heap[i];
+            heap[i] = s;
+            i = o;
+        }
+        else break;
+        //cout << "ok";
+    }
 }
 
 template<typename T>
@@ -62,11 +99,15 @@ vector<T> Heap<T>::get_vec() {
 template<typename T>
 void Heap<T>::Shift_down(int ind) {
     int i = ind;
-    while(i <= heap.size()){
+    if(heap.empty()){
+        cout << 0 << endl;
+        return;
+    }
+    while(i <= int(heap.size())){
         int o1 = 2 * i + 1;
         int o2 = 2 * i + 2;
-        if(o1 >= heap.size()) o1 = -1;
-        if(o2 >= heap.size()) o2 = -1;
+        if(o1 >= int(heap.size())) o1 = -1;
+        if(o2 >= int(heap.size())) o2 = -1;
         if(o1 == -1 && o2 == -1) break;
         int maxind = -1;
         if(o1 == -1 || o2 == -1) maxind = max(o1, o2);
@@ -86,25 +127,151 @@ void Heap<T>::Shift_down(int ind) {
 }
 
 template<typename T>
+void Heap<T>::Shift_down1(int ind) {
+    int i = ind;
+    if(heap.empty()){
+        //cout << 0 << endl;
+        return;
+    }
+    while(i <= int(heap.size())){
+        int o1 = 2 * i + 1;
+        int o2 = 2 * i + 2;
+        if(o1 >= int(heap.size())) o1 = -1;
+        if(o2 >= int(heap.size())) o2 = -1;
+        if(o1 == -1 && o2 == -1) break;
+        int maxind = -1;
+        if(o1 == -1 || o2 == -1) maxind = max(o1, o2);
+        else{
+            if(heap[o1] >= heap[o2]) maxind = o1;
+            else maxind = o2;
+        }
+        if(heap[i] < heap[maxind]){
+            T s = heap[maxind];
+            heap[maxind] = heap[i];
+            heap[i] = s;
+            i = maxind;
+        }
+        else break;
+    }
+}
+
+template<typename T>
 void Heap<T>::decreaseEl(int ind, T val) {
     heap[ind] -= val;
 }
 
 template<typename T>
-void Heap<T>::extractMax() {
+T Heap<T>::extractMax() {
     T extracted = heap[0];
     heap[0] = heap.back();
     heap.pop_back();
     this->Shift_down(0);
     cout << extracted << endl;
+    return extracted;
+}
+
+template<typename T>
+void Heap<T>::insert(T val) {
+    heap.push_back(val);
+    this->Shift_up(heap.size() - 1);
+}
+
+template<typename T>
+void Heap<T>::Delete(int ind) {
+    T deleted = heap[ind];
+    heap[ind] = heap.back();
+    heap.pop_back();
+    this->Shift_up1(ind);
+    this->Shift_down1(ind);
+    cout << deleted << endl;
+}
+
+template<typename T>
+Heap<T>::Heap() {
+}
+template<typename T>
+void Heap<T>::Build_Heap1(vector<int>& v){
+    heap.push_back(v[0]);
+    for(int i = 1;i < v.size();i++){
+        heap.push_back(v[i]);
+        this->Shift_up(heap.size() - 1);
+    }
+}
+
+template<typename T>
+void Heap<T>::Build_Heap2(vector<int>& v){
+    heap = v;
+    for(int i = heap.size() - 1;i >= 0;i--){
+        this->Shift_down1(i);
+    }
+}
+
+template<typename T>
+bool Heap<T>::empty() {
+    if(heap.empty() == true) return true;
+    else return false;
+}
+
+template<typename T>
+int Heap<T>::size() {
+    return heap.size();
+}
+
+void pyramidSort(vector<int>& v){
+    Heap<int> heap;
+    heap.Build_Heap2(v);
+    v.clear();
+    while (!heap.empty()){
+        v.push_back(heap.extractMax());
+    }
+    reverse(v.begin(), v.end());
 }
 
 int main() {
+    int n, m;
+    cin >> n >> m;
+    vector<int> vec;
+    Heap<int> h(vec);
+    int i = 0;
+    while(m--){
+        int a;
+        cin >> a;
+        if(a == 1){
+            if(h.empty()) cout << -1 << endl;
+            else{
+                int y = h.extractMax();
+                i--;
+            }
+        }
+        else if(a == 2){
+            int b;
+            cin >> b;
+            if(i < n){
+                h.insert(b);
+                i++;
+            }
+            else cout << -1 << endl;
+        }
+        else if(a == 3){
+            int c;
+            cin >> c;
+            c--;
+            if(h.empty() || c >= h.size()) cout << -1 << endl;
+            else{
+                h.Delete(c);
+                i--;
+            }
+        }
+    }
+    cout << h;
+    /*
     int n;
     cin >> n;
-    vector<int> vec(n);
-    for(int i = 0;i < n;i++) cin >> vec[i];
-    Heap<int> h(vec);
-    for(int i = 0;i < n - 1;i++) h.extractMax();
+    vector<int> v(n);
+    for(int i = 0;i < n;i++) cin >> v[i];
+    pyramidSort(v);
+    for(auto i : v) cout << i << " ";
+    cout << endl;
+     */
     return 0;
 }
